@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from PIL import Image
 import io
 import os
@@ -32,27 +33,12 @@ app.add_middleware(
 GOOGLE_API_KEY = "AIzaSyBDshDoYgSsaf3aEMFFaleIhcfmsfDepQs"
 
 # Configure Gemini
-# Check if environment variable is set, otherwise use the placeholder
 api_key = os.environ.get("GOOGLE_API_KEY", GOOGLE_API_KEY)
 
 if not api_key or api_key == "YOUR_API_KEY_HERE":
     logger.warning("GOOGLE_API_KEY is not set. Please set it in main.py or as an environment variable.")
 
-genai.configure(api_key=api_key)
-
-# Configuration for Gemini 1.5 Flash
-generation_config = {
-  "temperature": 0.1,
-  "top_p": 0.95,
-  "top_k": 64,
-  "max_output_tokens": 8192,
-  "response_mime_type": "application/json",
-}
-
-model = genai.GenerativeModel(
-  model_name="gemini-flash-latest",
-  generation_config=generation_config,
-)
+client = genai.Client(api_key=api_key)
 
 @app.post("/extract")
 @limiter.limit("10/minute")
@@ -83,7 +69,17 @@ invoice_number: The invoice ID.
 
 Return only the JSON.
 """
-        response = model.generate_content([prompt, image])
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[prompt, image],
+            config=types.GenerateContentConfig(
+                temperature=0.1,
+                top_p=0.95,
+                top_k=64,
+                max_output_tokens=8192,
+                response_mime_type="application/json",
+            )
+        )
         
         # Clean up response to ensure it's pure JSON
         response_text = response.text.strip()
