@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { UserButton } from "@clerk/nextjs";
 import {
   Upload,
   FileText,
@@ -159,6 +160,9 @@ export default function ExtractionWorkbench() {
                 <RotateCcw className="w-4 h-4" />
                 <span>Reset</span>
               </motion.button>
+              <div className="ml-2">
+                <UserButton />
+              </div>
             </div>
           </div>
         </div>
@@ -190,7 +194,7 @@ export default function ExtractionWorkbench() {
                 />
               </div>
               <p className="text-xs text-blue-100 mt-2">
-                Using Gemini 1.5 Flash Vision AI • Extracting fields • Validating GST
+                Using Gemini 2.5 Flash Lite • Extracting fields • Validating GST
               </p>
             </motion.div>
           )}

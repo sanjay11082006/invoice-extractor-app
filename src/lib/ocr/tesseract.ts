@@ -2,7 +2,7 @@
 
 import { InvoiceData, ExtractionResult } from '@/types/invoice';
 
-const BACKEND_URL = 'http://localhost:8000/extract';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://invoice-extractor-app.onrender.com/extract';
 
 export class InvoiceOCRService {
 
@@ -27,11 +27,19 @@ export class InvoiceOCRService {
 
       if (onProgress) onProgress(0.6);
 
+      console.log('Response Status:', response.status);
+      const text = await response.text();
+      console.log('Response Body:', text);
+
       if (!response.ok) {
-        throw new Error(`Backend API Error: ${response.statusText}`);
+        throw new Error(`Backend API Error: ${response.statusText} - ${text}`);
       }
 
-      const data = await response.json();
+      if (!text) {
+        throw new Error('Backend returned empty response');
+      }
+
+      const data = JSON.parse(text);
 
       if (onProgress) onProgress(0.9);
 

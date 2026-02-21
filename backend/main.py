@@ -23,20 +23,20 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Allow CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://invoice-extractor-app.vercel.app"],
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "https://invoice-extractor-app.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Placeholder for API Key - Paste your key here
-GOOGLE_API_KEY = "AIzaSyBDshDoYgSsaf3aEMFFaleIhcfmsfDepQs"
-
 # Configure Gemini
-api_key = os.environ.get("GOOGLE_API_KEY", GOOGLE_API_KEY)
+from dotenv import load_dotenv
+load_dotenv()
 
-if not api_key or api_key == "YOUR_API_KEY_HERE":
-    logger.warning("GOOGLE_API_KEY is not set. Please set it in main.py or as an environment variable.")
+api_key = os.environ.get("GOOGLE_API_KEY")
+
+if not api_key or api_key == "YOUR_NEW_API_KEY_HERE":
+    logger.warning("GOOGLE_API_KEY is not set. Please set it in backend/.env")
 
 client = genai.Client(api_key=api_key)
 
@@ -44,8 +44,10 @@ client = genai.Client(api_key=api_key)
 @limiter.limit("10/minute")
 async def extract_invoice(request: Request, file: UploadFile = File(...)):
     # 1. File Type Validation
-    if file.content_type not in ["image/jpeg", "image/png", "application/pdf"]:
-        raise HTTPException(status_code=415, detail="Invalid file type. Only JPEG, PNG, and PDF are allowed.")
+    logger.info(f"Received file type: {file.content_type}")
+    allowed_types = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/heic", "image/heif", "application/pdf", "application/octet-stream"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=415, detail=f"Invalid file type: {file.content_type}. Only JPEG, PNG, WEBP, HEIC, and PDF are allowed.")
 
     # 2. File Size Validation (Max 5MB)
     MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
@@ -55,7 +57,13 @@ async def extract_invoice(request: Request, file: UploadFile = File(...)):
     
     await file.seek(0)  # Reset file pointer after reading size
     try:
-        image = Image.open(io.BytesIO(contents))
+        if file.content_type == "application/pdf":
+            logger.info("Processing file as PDF using raw bytes")
+            # For PDFs, pass the raw bytes directly with the MIME type
+            input_file = types.Part.from_bytes(data=contents, mime_type="application/pdf")
+        else:
+            # For images, verify it's a valid image using PIL
+            input_file = Image.open(io.BytesIO(contents))
 
         prompt = """
 Analyze this invoice image. Extract the following fields into a clean JSON format:
@@ -70,8 +78,8 @@ invoice_number: The invoice ID.
 Return only the JSON.
 """
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[prompt, image],
+            model="gemini-2.5-flash-lite",
+                contents=[prompt, input_file],
             config=types.GenerateContentConfig(
                 temperature=0.1,
                 top_p=0.95,

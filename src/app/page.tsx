@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { 
-  FileText, 
-  Zap, 
-  CheckCircle2, 
-  TrendingUp, 
+import { UserButton } from "@clerk/nextjs";
+import {
+  FileText,
+  Zap,
+  CheckCircle2,
+  TrendingUp,
   Clock,
   IndianRupee,
   Shield,
@@ -113,6 +114,7 @@ export default function Dashboard() {
     date: invoice.date
   }));
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header */}
@@ -130,7 +132,7 @@ export default function Dashboard() {
                 <p className="text-xs text-slate-500">Intelligent Data Extraction</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -141,6 +143,9 @@ export default function Dashboard() {
                 <Upload className="w-4 h-4 inline mr-2" />
                 Upload Invoice
               </motion.button>
+              <div className="ml-2">
+                <UserButton afterSignOutUrl="/sign-in" />
+              </div>
             </div>
           </div>
         </div>
@@ -148,7 +153,7 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Quick Stats Banner */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
@@ -170,9 +175,9 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {bentoCards.map((card, index) => {
             const Icon = card.icon;
-            const colSpan = card.size === 'large' ? 'lg:col-span-1' : 
-                           card.size === 'medium' ? 'md:col-span-1' : 'md:col-span-1';
-            
+            const colSpan = card.size === 'large' ? 'lg:col-span-1' :
+              card.size === 'medium' ? 'md:col-span-1' : 'md:col-span-1';
+
             return (
               <motion.div
                 key={card.title}
@@ -183,7 +188,7 @@ export default function Dashboard() {
               >
                 <div className="relative overflow-hidden bg-white rounded-2xl p-6 border border-slate-200 hover:border-slate-300 transition-all duration-300 hover:shadow-xl h-full">
                   <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-                  
+
                   <div className="relative">
                     <div className="flex items-start justify-between mb-4">
                       <div className={`${card.bgColor} p-3 rounded-xl`}>
@@ -198,9 +203,9 @@ export default function Dashboard() {
                         </motion.div>
                       )}
                     </div>
-                    
+
                     <h3 className="text-sm font-medium text-slate-600 mb-2">{card.title}</h3>
-                    
+
                     <div className="mb-2">
                       <motion.div
                         initial={{ scale: 0.5, opacity: 0 }}
@@ -211,7 +216,7 @@ export default function Dashboard() {
                         {card.value}
                       </motion.div>
                     </div>
-                    
+
                     {card.target && (
                       <p className="text-xs text-green-600 font-medium">{card.target}</p>
                     )}
@@ -237,14 +242,14 @@ export default function Dashboard() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-slate-900">Recent Activity</h3>
-                <button 
+                <button
                   onClick={() => router.push('/export')}
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   View All →
                 </button>
               </div>
-              
+
               <div className="space-y-3">
                 {recentActivity.length > 0 ? (
                   recentActivity.map((item, index) => (
@@ -266,11 +271,10 @@ export default function Dashboard() {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-slate-900">₹{item.amount.toLocaleString('en-IN')}</p>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          item.status === 'verified' 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-amber-100 text-amber-700'
-                        }`}>
+                        <span className={`text-xs px-2 py-1 rounded-full ${item.status === 'verified'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-amber-100 text-amber-700'
+                          }`}>
                           {item.status}
                         </span>
                       </div>
@@ -303,7 +307,7 @@ export default function Dashboard() {
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-lg"
             >
               <h3 className="text-lg font-bold text-slate-900 mb-6">Quick Actions</h3>
-              
+
               <div className="space-y-3">
                 <motion.button
                   whileHover={{ scale: 1.02, x: 5 }}
@@ -314,7 +318,7 @@ export default function Dashboard() {
                   <Upload className="w-5 h-5 text-blue-600" />
                   <span className="font-medium text-slate-700 group-hover:text-slate-900">Upload New Invoice</span>
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.02, x: 5 }}
                   whileTap={{ scale: 0.98 }}
@@ -324,7 +328,7 @@ export default function Dashboard() {
                   <Download className="w-5 h-5 text-emerald-600" />
                   <span className="font-medium text-slate-700 group-hover:text-slate-900">Export Data</span>
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.02, x: 5 }}
                   whileTap={{ scale: 0.98 }}
