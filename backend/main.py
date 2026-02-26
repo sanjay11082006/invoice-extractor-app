@@ -10,6 +10,7 @@ import io
 import os
 import json
 import logging
+import filetype
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -44,13 +45,18 @@ if not api_key or api_key == "YOUR_NEW_API_KEY_HERE":
 client = genai.Client(api_key=api_key)
 
 @app.post("/extract")
-@limiter.limit("10/minute")
+@limiter.limit("5/minute")
 async def extract_invoice(request: Request, file: UploadFile = File(...)):
-    # 1. File Type Validation
-    logger.info(f"Received file type: {file.content_type}")
-    allowed_types = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/heic", "image/heif", "application/pdf", "application/octet-stream"]
-    if file.content_type not in allowed_types:
-        raise HTTPException(status_code=415, detail=f"Invalid file type: {file.content_type}. Only JPEG, PNG, WEBP, HEIC, and PDF are allowed.")
+    # 1. File Type Validation (Header-based)
+    logger.info(f"Received file upload: {file.filename}, content_type: {file.content_type}")
+    header = await file.read(2048)
+    kind = filetype.guess(header)
+    allowed_mimes = {"application/pdf", "image/png", "image/jpeg", "image/jpg"}
+    if not kind or kind.mime not in allowed_mimes:
+        await file.seek(0)
+        raise HTTPException(status_code=400, detail="Invalid file type")
+
+    await file.seek(0)
 
     # 2. File Size Validation (Max 5MB)
     MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
@@ -58,11 +64,10 @@ async def extract_invoice(request: Request, file: UploadFile = File(...)):
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large. Maximum size is 5MB.")
     
-    await file.seek(0)  # Reset file pointer after reading size
+    await file.seek(0)  # Reset file pointer after reading size so downstream readers start at 0
     try:
-        if file.content_type == "application/pdf":
+        if kind.mime == "application/pdf":
             logger.info("Processing file as PDF using raw bytes")
-            # For PDFs, pass the raw bytes directly with the MIME type
             input_file = types.Part.from_bytes(data=contents, mime_type="application/pdf")
         else:
             # For images, verify it's a valid image using PIL

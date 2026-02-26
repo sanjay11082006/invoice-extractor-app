@@ -5,3 +5,4 @@ Pillow
 google-genai>=0.1.0
 slowapi
 python-dotenv
+filetype
