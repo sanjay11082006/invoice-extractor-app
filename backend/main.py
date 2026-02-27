@@ -37,10 +37,10 @@ import os
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=env_path)
 
-api_key = os.environ.get("GEMINI_API_KEY")
+api_key = os.getenv("GOOGLE_API_KEY")
 
 if not api_key or api_key == "YOUR_NEW_API_KEY_HERE":
-    logger.warning("GEMINI_API_KEY is not set. Please set it in backend/.env")
+    logger.warning("GOOGLE_API_KEY is not set. Please set it in backend/.env")
 
 client = genai.Client(api_key=api_key)
 
