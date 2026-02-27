@@ -26,10 +26,8 @@ export default function LandingPage() {
                     <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
                     <a href="https://github.com/PillaSanjayRaj" target="_blank" rel="noreferrer" className="hover:text-gray-900 transition-colors">GitHub</a>
                 </div>
-                <Link href="/sign-in">
-                    <button className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full shadow-md transition-all">
-                        Get Started
-                    </button>
+                <Link href="/sign-in" className="inline-block px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full shadow-md transition-all">
+                    Get Started
                 </Link>
             </nav>
 
@@ -55,10 +53,8 @@ export default function LandingPage() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                    <Link href="/sign-in" className="w-full sm:w-auto">
-                        <button className="w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-base">
-                            Get Started &rarr;
-                        </button>
+                    <Link href="/sign-in" className="w-full sm:w-auto flex justify-center items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-base">
+                        Get Started &rarr;
                     </Link>
                     <a href="#features" className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold border border-gray-200 rounded-full shadow-sm transition-all text-base">
                         View Features
